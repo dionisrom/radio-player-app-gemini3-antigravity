@@ -1,0 +1,126 @@
+/* Theme System using CSS Custom Properties */
+
+/* Monochrome Theme (Default) - Black, White, Gray with Dark Background */
+[data-theme="monochrome"] {
+    --primary-from: #0a0a0a;
+    --primary-via: #1a1a1a;
+    --primary-to: #2d2d2d;
+    --accent-color: #ffffff;
+    --accent-hover: #e0e0e0;
+    --icon-color: #888888;
+    --logo-color: #888888;
+}
+
+/* Force dark mode for monochrome */
+[data-theme="monochrome"] {
+    color-scheme: dark;
+}
+
+[data-theme="monochrome"] body {
+    background-color: #0a0a0a;
+}
+
+[data-theme="monochrome"] #bg-gradient {
+    background: linear-gradient(to bottom right, #0a0a0a, #1a1a1a, #2d2d2d);
+}
+
+/* Ensure proper contrast for monochrome theme */
+[data-theme="monochrome"] .glass-panel {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="monochrome"] .glass-input {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+}
+
+[data-theme="monochrome"] .glass-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+[data-theme="monochrome"] #player-icon {
+    background: linear-gradient(to bottom right, #333333, #555555);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="monochrome"] .loader {
+    border-top-color: #888888;
+}
+
+/* Purple Dream Theme */
+[data-theme="purple"] {
+    --primary-from: #6366f1;
+    --primary-via: #8b5cf6;
+    --primary-to: #ec4899;
+    --accent-color: #a78bfa;
+    --accent-hover: #c084fc;
+    --icon-color: #ec4899;
+    --logo-color: #a78bfa;
+}
+
+/* Sunset Theme */
+[data-theme="sunset"] {
+    --primary-from: #f97316;
+    --primary-via: #f59e0b;
+    --primary-to: #eab308;
+    --accent-color: #fb923c;
+    --accent-hover: #fbbf24;
+    --icon-color: #f97316;
+    --logo-color: #fb923c;
+}
+
+/* Ocean Blue Theme */
+[data-theme="ocean"] {
+    --primary-from: #0ea5e9;
+    --primary-via: #06b6d4;
+    --primary-to: #14b8a6;
+    --accent-color: #22d3ee;
+    --accent-hover: #34d399;
+    --icon-color: #0ea5e9;
+    --logo-color: #22d3ee;
+}
+
+/* Forest Theme */
+[data-theme="forest"] {
+    --primary-from: #22c55e;
+    --primary-via: #10b981;
+    --primary-to: #14b8a6;
+    --accent-color: #4ade80;
+    --accent-hover: #34d399;
+    --icon-color: #22c55e;
+    --logo-color: #4ade80;
+}
+
+/* Apply theme colors to common elements */
+[data-theme]:not([data-theme="monochrome"]) #bg-gradient {
+    background: linear-gradient(to bottom right, var(--primary-from), var(--primary-via), var(--primary-to));
+}
+
+[data-theme] #logo-icon {
+    color: var(--logo-color);
+}
+
+[data-theme] .accent-text {
+    color: var(--accent-color);
+}
+
+[data-theme] .accent-input:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb, 136, 136, 136), 0.1);
+}
+
+[data-theme] .accent-hover:hover {
+    color: var(--accent-hover);
+}
+
+[data-theme]:not([data-theme="monochrome"]) #player-icon {
+    background: linear-gradient(to bottom right, var(--primary-via), var(--primary-to));
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme] .tab-button.active {
+    color: var(--accent-color);
+    border-bottom: 2px solid var(--accent-color);
+}
