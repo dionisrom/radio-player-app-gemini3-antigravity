@@ -21,6 +21,7 @@ class App {
         this.filterTag = '';
 
         this.elStationList = document.getElementById('station-list');
+        this.elScrollContainer = document.getElementById('scroll-container');
         this.elSearch = document.getElementById('search-input');
         this.elPlayBtn = document.getElementById('play-btn');
         this.elVizCanvas = document.getElementById('visualizer-canvas');
@@ -101,9 +102,9 @@ class App {
         if (tabStations) tabStations.addEventListener('click', () => this.switchTab('stations'));
         if (tabFavorites) tabFavorites.addEventListener('click', () => this.switchTab('favorites'));
 
-        this.elStationList.addEventListener('scroll', () => {
+        this.elScrollContainer.addEventListener('scroll', () => {
             if (this.currentTab === 'stations' &&
-                this.elStationList.scrollTop + this.elStationList.clientHeight >= this.elStationList.scrollHeight - 50) {
+                this.elScrollContainer.scrollTop + this.elScrollContainer.clientHeight >= this.elScrollContainer.scrollHeight - 50) {
                 this.loadStations();
             }
         });
