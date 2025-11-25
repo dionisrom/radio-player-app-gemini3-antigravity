@@ -13,6 +13,7 @@ class App {
         this.tags = [];
 
         this.currentStation = null;
+        this.currentPlaylist = [];
         this.page = 0;
         this.isLoading = false;
         this.currentTab = 'stations';
@@ -115,6 +116,9 @@ class App {
                 this.updatePlayButton();
             }
         });
+
+        document.getElementById('btn-prev').addEventListener('click', () => this.playPrevious());
+        document.getElementById('btn-next').addEventListener('click', () => this.playNext());
 
         document.getElementById('volume-slider').addEventListener('input', (e) => {
             this.audio.setVolume(e.target.value);
@@ -362,8 +366,41 @@ class App {
     }
 
     playStationByUuid(uuid) {
-        const station = this.stations.find(s => s.stationuuid === uuid) || this.favorites.find(s => s.stationuuid === uuid);
-        if (station) this.playStation(station);
+        const list = this.currentTab === 'favorites' ? this.favorites : this.stations;
+        const station = list.find(s => s.stationuuid === uuid);
+
+        if (station) {
+            this.currentPlaylist = list;
+            this.playStation(station);
+        } else {
+            // Fallback: check other list if not found in current (e.g. if switching tabs quickly)
+            const otherList = this.currentTab === 'favorites' ? this.stations : this.favorites;
+            const otherStation = otherList.find(s => s.stationuuid === uuid);
+            if (otherStation) {
+                this.currentPlaylist = otherList;
+                this.playStation(otherStation);
+            }
+        }
+    }
+
+    playNext() {
+        if (!this.currentStation || this.currentPlaylist.length === 0) return;
+
+        const currentIndex = this.currentPlaylist.findIndex(s => s.stationuuid === this.currentStation.stationuuid);
+        if (currentIndex === -1) return;
+
+        const nextIndex = (currentIndex + 1) % this.currentPlaylist.length;
+        this.playStation(this.currentPlaylist[nextIndex]);
+    }
+
+    playPrevious() {
+        if (!this.currentStation || this.currentPlaylist.length === 0) return;
+
+        const currentIndex = this.currentPlaylist.findIndex(s => s.stationuuid === this.currentStation.stationuuid);
+        if (currentIndex === -1) return;
+
+        const prevIndex = (currentIndex - 1 + this.currentPlaylist.length) % this.currentPlaylist.length;
+        this.playStation(this.currentPlaylist[prevIndex]);
     }
 
     playStation(station) {

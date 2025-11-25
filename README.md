@@ -54,6 +54,20 @@ Since this is a client-side web application, it requires no backend setup.
 
 3.  **Open in Browser**: Navigate to `http://localhost:8000` (or whatever port your server uses).
 
+## ☁️ Deployment
+
+### Vercel
+This project is configured for easy deployment on [Vercel](https://vercel.com). A `vercel.json` file is included to ensure clean URLs and proper routing.
+
+1.  Push your code to a Git repository (GitHub, GitLab, Bitbucket).
+2.  Import the project into Vercel.
+3.  Vercel will automatically detect the static site configuration.
+4.  Deploy!
+
+The `vercel.json` configuration handles:
+*   **Clean URLs**: Removes `.html` extensions from URLs.
+*   **Trailing Slashes**: Removes trailing slashes for consistency.
+
 ## 🎮 Controls
 
 *   **Search**: Use the search bar to find stations by name, tag, or country.
