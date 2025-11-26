@@ -455,6 +455,7 @@ class App {
         this.audio.updateMediaSession(station);
 
         this.updatePlayButton();
+        this.renderList();
     }
 
     toggleFavorite(uuid) {
