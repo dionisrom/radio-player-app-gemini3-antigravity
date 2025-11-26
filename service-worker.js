@@ -35,6 +35,7 @@ self.addEventListener('install', (event) => {
             })
             .catch((error) => {
                 console.error('[Service Worker] Installation failed:', error);
+                throw error; // Prevent installation with incomplete cache
             })
     );
 });
