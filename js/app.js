@@ -408,40 +408,54 @@ class App {
     }
 
     playStation(station) {
-        if (this.currentStation?.stationuuid === station.stationuuid) {
-            this.audio.toggle();
-            this.renderList();
-            return;
-        }
-
         this.currentStation = station;
         this.audio.play(station.url_resolved || station.url);
-        this.audio.updateMediaSession(station);
-        this.api.sendClick(station.stationuuid);
 
+        // Update UI
         document.getElementById('player-station-name').textContent = station.name;
-        document.getElementById('player-genre').textContent = station.tags ? station.tags.split(',')[0] : 'Radio';
-        document.getElementById('player-tech-info').innerHTML = `<span>${station.codec}</span> • <span>${station.bitrate}kbps</span>`;
+        document.getElementById('player-song-info').textContent = station.tags || 'Loading...';
+        document.getElementById('player-genre').textContent = station.tags?.split(',')[0] || 'Radio';
 
-        const songInfo = document.getElementById('player-song-info');
-        songInfo.textContent = 'Playing...';
-        songInfo.classList.add('animate-pulse');
-
-        // Clear any existing timeout
-        if (this.metadataTimeout) {
-            clearTimeout(this.metadataTimeout);
+        // Update player icon
+        const playerIcon = document.getElementById('player-icon');
+        if (station.favicon) {
+            playerIcon.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = station.favicon;
+            img.className = 'w-full h-full object-cover rounded-lg md:rounded-xl';
+            img.onerror = () => {
+                playerIcon.innerHTML = '<i class="fa-solid fa-music text-xl md:text-2xl text-white"></i>';
+            };
+            playerIcon.appendChild(img);
+        } else {
+            playerIcon.innerHTML = '<i class="fa-solid fa-music text-xl md:text-2xl text-white"></i>';
         }
 
-        // If no metadata arrives in 10 seconds, update the message
-        this.metadataTimeout = setTimeout(() => {
-            if (songInfo.textContent === 'Playing...') {
-                songInfo.textContent = 'No song info available';
-                songInfo.classList.remove('animate-pulse');
-            }
-        }, 10000);
+        // Setup metadata listener
+        this.audio.onMetadata = (meta) => {
+            const songInfo = meta.StreamTitle || meta.title || station.tags || 'Now Playing';
+            document.getElementById('player-song-info').textContent = songInfo;
+            // Update media session with current song
+            this.audio.updateMediaSession(station, meta.StreamTitle || meta.title);
+        };
 
-        this.renderList();
+        // Tech info
+        const techInfo = document.getElementById('player-tech-info');
+        const parts = [];
+        if (station.bitrate) parts.push(station.bitrate + ' kbps');
+        if (station.codec) parts.push(station.codec);
+        techInfo.textContent = parts.join(' • ');
+
+        // Update visualizer mode
+        if (this.visualizer) {
+            this.visualizer.updateMode();
+        }
+
+        // Update media session immediately on station start
+        this.audio.updateMediaSession(station);
+
         this.updatePlayButton();
+        this.renderList();
     }
 
     toggleFavorite(uuid) {
@@ -461,14 +475,21 @@ class App {
     }
 
     updatePlayButton() {
-        const icon = this.elPlayBtn.querySelector('i');
+        const btn = document.getElementById('play-btn');
+        const icon = btn.querySelector('i');
+
         if (this.audio.isPlaying) {
-            icon.classList.remove('fa-play');
-            icon.classList.add('fa-pause');
+            icon.className = 'fa-solid fa-pause text-base md:text-xl';
         } else {
-            icon.classList.remove('fa-pause');
-            icon.classList.add('fa-play');
+            icon.className = 'fa-solid fa-play text-base md:text-xl ml-0.5 md:ml-1';
+            // Clear metadata if no station is playing
+            if (!this.currentStation) {
+                this.audio.clearMediaSession();
+            }
         }
+
+        // Update MediaSession playback state (centralized in audio-manager)
+        this.audio.updatePlaybackState();
     }
 
     toggleTheme() {

@@ -12,6 +12,72 @@ class AudioManager {
         this.icecastPlayer = null;
         this.corsEnabled = false;
         this.onMetadata = null;
+
+        // Set up MediaSession handlers once during initialization
+        this.setupMediaSessionHandlers();
+    }
+
+    setupMediaSessionHandlers() {
+        if ('mediaSession' in navigator) {
+            // Set up action handlers for media controls - only once
+            navigator.mediaSession.setActionHandler('play', () => {
+                console.log('MediaSession: Play action');
+                if (!this.isPlaying) {
+                    this.toggle();
+                }
+            });
+
+            navigator.mediaSession.setActionHandler('pause', () => {
+                console.log('MediaSession: Pause action');
+                if (this.isPlaying) {
+                    this.toggle();
+                }
+            });
+
+            navigator.mediaSession.setActionHandler('stop', () => {
+                console.log('MediaSession: Stop action');
+                if (this.isPlaying) {
+                    this.toggle();
+                }
+            });
+
+            // Next/Previous handlers - will be connected to app navigation
+            navigator.mediaSession.setActionHandler('nexttrack', () => {
+                console.log('MediaSession: Next track action');
+                if (window.app && window.app.playNext) {
+                    window.app.playNext();
+                }
+            });
+
+            navigator.mediaSession.setActionHandler('previoustrack', () => {
+                console.log('MediaSession: Previous track action');
+                if (window.app && window.app.playPrevious) {
+                    window.app.playPrevious();
+                }
+            });
+
+            // Seek handlers (optional - some browsers/cars support this)
+            try {
+                navigator.mediaSession.setActionHandler('seekbackward', () => {
+                    console.log('MediaSession: Seek backward (skip to previous)');
+                    if (window.app && window.app.playPrevious) {
+                        window.app.playPrevious();
+                    }
+                });
+
+                navigator.mediaSession.setActionHandler('seekforward', () => {
+                    console.log('MediaSession: Seek forward (skip to next)');
+                    if (window.app && window.app.playNext) {
+                        window.app.playNext();
+                    }
+                });
+            } catch (error) {
+                // Some browsers don't support seek actions
+                console.log('Seek actions not supported:', error.message);
+            }
+
+            console.log('MediaSession action handlers initialized');
+        }
     }
 
     initAudioContext() {
@@ -258,6 +324,8 @@ class AudioManager {
             if (this.icecastPlayer) this.icecastPlayer.play();
             this.isPlaying = true;
         }
+        // Update MediaSession playback state
+        this.updatePlaybackState();
     }
 
     setVolume(val) {
@@ -268,13 +336,46 @@ class AudioManager {
 
     updateMediaSession(station, songTitle) {
         if ('mediaSession' in navigator) {
+            // Update metadata with rich information
+            const artworkUrl = station.favicon || '/icons/icon-512x512.png';
+
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: songTitle || station.name,
-                artist: songTitle ? station.name : (station.tags || 'Radio'),
-                artwork: station.favicon ? [{ src: station.favicon, sizes: '96x96', type: 'image/png' }] : []
+                artist: songTitle ? station.name : (station.tags || 'Radio Station'),
+                album: station.country || 'Internet Radio',
+                artwork: [
+                    { src: artworkUrl, sizes: '96x96', type: 'image/png' },
+                    { src: artworkUrl, sizes: '128x128', type: 'image/png' },
+                    { src: artworkUrl, sizes: '192x192', type: 'image/png' },
+                    { src: artworkUrl, sizes: '256x256', type: 'image/png' },
+                    { src: artworkUrl, sizes: '384x384', type: 'image/png' },
+                    { src: artworkUrl, sizes: '512x512', type: 'image/png' }
+                ]
             });
-            navigator.mediaSession.setActionHandler('play', () => { this.toggle(); });
-            navigator.mediaSession.setActionHandler('pause', () => { this.toggle(); });
+
+            // Update playback state
+            navigator.mediaSession.playbackState = this.isPlaying ? 'playing' : 'paused';
+
+            console.log('MediaSession updated:', {
+                title: songTitle || station.name,
+                artist: songTitle ? station.name : station.tags,
+                state: this.isPlaying ? 'playing' : 'paused'
+            });
+        }
+    }
+
+    clearMediaSession() {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = null;
+            navigator.mediaSession.playbackState = 'none';
+            console.log('MediaSession cleared');
+        }
+    }
+
+    updatePlaybackState() {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.playbackState = this.isPlaying ? 'playing' : 'paused';
+            console.log('MediaSession playback state updated:', this.isPlaying ? 'playing' : 'paused');
         }
     }
 }
