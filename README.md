@@ -11,6 +11,8 @@ A beautiful, feature-rich web-based radio player built with modern web technolog
 *   **🌍 Global Station Search**: Powered by the [Radio Browser API](https://www.radio-browser.info/), giving access to over 30,000 stations worldwide.
 *   **❤️ Favorites System**: Save your favorite stations for quick access. Import/Export functionality allows you to backup and share your list.
 *   **🛡️ Robust CORS Handling**: Custom-built audio engine that gracefully handles Cross-Origin Resource Sharing (CORS) restrictions, ensuring streams play even when metadata is blocked.
+*   **📱 Progressive Web App (PWA)**: Install on your Android home screen like a native app. Works offline with cached assets for instant loading.
+*   **🎧 Enhanced Media Controls**: Full MediaSession API integration enables lock screen controls, notification controls, and rich Bluetooth car audio integration.
 *   **📱 Responsive Design**: Fully responsive interface that looks great on desktops, tablets, and mobile devices.
 *   **🎧 Metadata Support**: Displays song titles and artist information (via Icecast metadata or Media Session API) when available.
 
@@ -67,6 +69,59 @@ This project is configured for easy deployment on [Vercel](https://vercel.com). 
 The `vercel.json` configuration handles:
 *   **Clean URLs**: Removes `.html` extensions from URLs.
 *   **Trailing Slashes**: Removes trailing slashes for consistency.
+*   **PWA Headers**: Proper caching for service worker and manifest files.
+
+## 📱 PWA Installation
+
+This app is a **Progressive Web App (PWA)** and can be installed on your device like a native app!
+
+### Install on Android
+
+1. Open the app in **Chrome** on your Android device
+2. Tap the menu (⋮) in the top-right corner
+3. Select **"Add to Home screen"** or **"Install app"**
+4. Follow the prompts to add the icon to your home screen
+5. Launch from your home screen for a fullscreen, app-like experience!
+
+### Install on Desktop
+
+1. Open the app in **Chrome** or **Edge**
+2. Look for the install icon (⊕) in the address bar
+3. Click **"Install"**
+4. The app will open in its own window
+
+### PWA Benefits
+
+*   **🚀 Faster Loading**: Service worker caches assets for instant loading
+*   **📴 Offline Support**: App UI works even without internet connection (streams require connection)
+*   **🏠 Home Screen Icon**: Custom radio wave icon on your device
+*   **📱 Fullscreen Mode**: No browser UI, just the app
+*   **🔄 Auto Updates**: Always get the latest version
+
+## 🎧 Media Controls
+
+The app integrates with your device's native media controls for a seamless experience:
+
+### Lock Screen & Notification Controls
+
+*   **📱 Lock Screen**: Control playback without unlocking your phone
+*   **🔔 Notifications**: Full media player in your notification shade
+*   **⏯️ Controls**: Play, pause, next station, previous station
+*   **🎨 Rich Display**: Shows station name, current song, and artwork
+
+### Car Integration
+
+*   **🚗 Bluetooth Audio**: Station metadata appears on your car's display
+*   **🎛️ Steering Wheel**: Use steering wheel controls to play/pause and change stations
+*   **📻 Car Display**: Album art and song info display on compatible car screens
+
+### Keyboard Shortcuts (Desktop)
+
+*   **Space**: Play / Pause
+*   **→**: Next station
+*   **←**: Previous station
+
+> **🚀 Android Auto Support**: We're working on full Android Auto integration via a TWA (Trusted Web Activity) wrapper. See `ANDROID_AUTO_PLAN.md` for details.
 
 ## 🎮 Controls
 

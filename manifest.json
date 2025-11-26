@@ -1,0 +1,50 @@
+{
+    "name": "RadioWave - Modern Web Radio Player",
+    "short_name": "RadioWave",
+    "description": "A beautiful, feature-rich web radio player with real-time audio visualization and access to over 30,000 stations worldwide.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0f172a",
+    "theme_color": "#6366f1",
+    "orientation": "portrait-primary",
+    "categories": [
+        "music",
+        "entertainment"
+    ],
+    "icons": [
+        {
+            "src": "/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-maskable-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Favorites",
+            "short_name": "Favorites",
+            "description": "Open your favorite stations",
+            "url": "/?tab=favorites",
+            "icons": [
+                {
+                    "src": "/icons/icon-192x192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ],
+    "screenshots": [],
+    "prefer_related_applications": false
+}
