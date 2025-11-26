@@ -16,6 +16,43 @@ A beautiful, feature-rich web-based radio player built with modern web technolog
 *   **📱 Responsive Design**: Fully responsive interface that looks great on desktops, tablets, and mobile devices.
 *   **🎧 Metadata Support**: Displays song titles and artist information (via Icecast metadata or Media Session API) when available.
 
+## 🚗 Android Auto Integration Progress
+
+**Status**: Phase 1 Complete ✅ | Working towards full Android Auto support
+
+### ✅ Phase 1: PWA Foundation (Completed)
+
+The radio player now features a robust PWA implementation that provides enhanced car integration even before Android Auto:
+
+*   **🔒 Lock Screen Controls**: Play, pause, next, and previous controls on your phone's lock screen
+*   **🔔 Rich Notifications**: Full media player in the notification shade with album art and station info
+*   **🚗 Bluetooth Car Audio**: Station names and metadata display on your car's screen via Bluetooth
+*   **🎛️ Steering Wheel Controls**: Use your car's steering wheel buttons to control playback
+*   **⚡ Offline Support**: App shell cached for instant loading, works without internet connection (streams require connection)
+*   **🏠 Installable**: Add to home screen for a native app-like experience
+
+### 🎯 Roadmap to Full Android Auto Support
+
+We're implementing a **Trusted Web Activity (TWA) Wrapper** approach to achieve native Android Auto integration while maintaining the web application:
+
+**Phase 2: Android TWA Setup** (Next)
+- Native Android wrapper app using Trusted Web Activities
+- Digital Asset Links for app verification
+- TWA integration with the existing PWA
+
+**Phase 3: MediaBrowserService Implementation**
+- Native Android MediaBrowserService for Android Auto compatibility
+- JavaScript bridge between web app and native layer
+- Station browsing hierarchy for in-car interface
+
+**Phase 4: Android Auto Integration**
+- Full Android Auto support with in-car display
+- Voice command integration
+- Desktop Head Unit (DHU) testing
+- Real car testing and optimization
+
+📖 **Full Documentation**: See `ANDROID_AUTO_PLAN.md` and `ANDROID_AUTO_TASKS.md` for detailed implementation plans and progress tracking.
+
 ## 🚀 Technical Highlights
 
 ### "Nuclear" CORS Fallback Strategy

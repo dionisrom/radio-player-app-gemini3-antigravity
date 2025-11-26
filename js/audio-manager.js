@@ -134,6 +134,9 @@ class AudioManager {
             this.metadataInterval = null;
         }
 
+        // Set playing state immediately so UI updates correctly
+        this.isPlaying = true;
+
         // Clear any pending connectSource timeout from previous streams
         if (this.connectTimeout) {
             clearTimeout(this.connectTimeout);
@@ -203,7 +206,6 @@ class AudioManager {
                 });
 
                 this.icecastPlayer.play();
-                this.isPlaying = true;
 
                 // Try to connect for visualizer, but don't fail if CORS blocks it
                 this.connectTimeout = setTimeout(() => {
