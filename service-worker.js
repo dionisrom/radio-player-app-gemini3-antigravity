@@ -68,9 +68,9 @@ self.addEventListener('fetch', (event) => {
 
     // Skip radio streams and external APIs
     const url = new URL(event.request.url);
-    if (url.hostname !== self.location.hostname &&
-        !url.hostname.includes('fonts.googleapis.com') &&
-        !url.hostname.includes('fonts.gstatic.com')) {
+    const ALLOWED_EXTERNAL_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
+    const isAllowedExternal = ALLOWED_EXTERNAL_HOSTS.some(host => url.hostname.includes(host));
+    if (url.hostname !== self.location.hostname && !isAllowedExternal) {
         return; // Let radio streams and APIs go directly to network
     }
 
