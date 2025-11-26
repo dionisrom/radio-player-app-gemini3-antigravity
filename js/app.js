@@ -441,7 +441,10 @@ class App {
 
         // Tech info
         const techInfo = document.getElementById('player-tech-info');
-        techInfo.textContent = `${station.bitrate ? station.bitrate + ' kbps' : ''} ${station.codec || ''}`.trim();
+        const parts = [];
+        if (station.bitrate) parts.push(station.bitrate + ' kbps');
+        if (station.codec) parts.push(station.codec);
+        techInfo.textContent = parts.join(' • ');
 
         // Update visualizer mode
         if (this.visualizer) {
