@@ -3,7 +3,8 @@
  * Provides offline support and faster loading
  */
 
-const CACHE_NAME = 'radiowave-v1';
+const CACHE_VERSION = '1.0.0'; // Update this version when assets change
+const CACHE_NAME = `radiowave-v${CACHE_VERSION}`;
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
