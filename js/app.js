@@ -419,7 +419,14 @@ class App {
         // Update player icon
         const playerIcon = document.getElementById('player-icon');
         if (station.favicon) {
-            playerIcon.innerHTML = `<img src="${station.favicon}" class="w-full h-full object-cover rounded-lg md:rounded-xl" onerror="this.parentElement.innerHTML='<i class=\\"fa-solid fa-music text-xl md:text-2xl text-white\\"></i>'">`;
+            playerIcon.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = station.favicon;
+            img.className = 'w-full h-full object-cover rounded-lg md:rounded-xl';
+            img.onerror = () => {
+                playerIcon.innerHTML = '<i class="fa-solid fa-music text-xl md:text-2xl text-white"></i>';
+            };
+            playerIcon.appendChild(img);
         } else {
             playerIcon.innerHTML = '<i class="fa-solid fa-music text-xl md:text-2xl text-white"></i>';
         }
