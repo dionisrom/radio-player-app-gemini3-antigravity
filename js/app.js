@@ -143,6 +143,10 @@ class App {
             this.toggleTheme();
         });
 
+        // Initialize volume
+        const volumeSlider = document.getElementById('volume-slider');
+        this.audio.setVolume(volumeSlider.value);
+
         new Sortable(this.elStationList, {
             animation: 150,
             handle: '.drag-handle',

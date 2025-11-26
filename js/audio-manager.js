@@ -19,7 +19,8 @@ class AudioManager {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         this.context = new AudioContext();
         this.analyser = this.context.createAnalyser();
-        this.analyser.fftSize = 256;
+        this.analyser.fftSize = 1024;
+        this.analyser.smoothingTimeConstant = 0.85;
         this.gainNode = this.context.createGain();
         this.gainNode.connect(this.context.destination);
     }
@@ -34,6 +35,9 @@ class AudioManager {
             this.source = this.context.createMediaElementSource(this.audio);
             this.source.connect(this.analyser);
             this.analyser.connect(this.gainNode);
+            // Re-ensure gain is connected to destination
+            this.gainNode.connect(this.context.destination);
+            console.log('Audio graph connected: Source -> Analyser -> Gain -> Destination');
         } catch (e) {
             console.warn("CORS restricted audio source - visualizer will not work", e);
             this.corsEnabled = false;
@@ -257,8 +261,9 @@ class AudioManager {
     }
 
     setVolume(val) {
-        if (this.gainNode) this.gainNode.gain.value = val;
-        this.audio.volume = val;
+        const volume = parseFloat(val);
+        if (this.gainNode) this.gainNode.gain.value = volume;
+        this.audio.volume = volume;
     }
 
     updateMediaSession(station, songTitle) {

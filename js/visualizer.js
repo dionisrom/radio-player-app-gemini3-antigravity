@@ -42,18 +42,39 @@ class Visualizer {
     }
 
     drawBars(width, height, data, bufferLength) {
-        const barWidth = (width / bufferLength) * 2.5;
-        let barHeight;
+        const visualBars = 64; // Fixed number of bars for a cleaner look
+        const barWidth = width / visualBars;
         let x = 0;
 
-        for (let i = 0; i < bufferLength; i++) {
-            barHeight = data[i] / 2;
+        for (let i = 0; i < visualBars; i++) {
+            // Map visual bar index to frequency bin index using a power curve (approximate log scale)
+            // This spreads lower frequencies (bass/mids) across more bars and compresses highs
+            const startBin = Math.floor(Math.pow(i / visualBars, 1.8) * bufferLength);
+            const endBin = Math.floor(Math.pow((i + 1) / visualBars, 1.8) * bufferLength);
+
+            // Calculate average amplitude for this frequency range
+            let sum = 0;
+            let count = 0;
+            // Ensure we at least sample one bin
+            const actualEndBin = Math.max(endBin, startBin + 1);
+
+            for (let j = startBin; j < actualEndBin && j < bufferLength; j++) {
+                sum += data[j];
+                count++;
+            }
+
+            const amplitude = count > 0 ? sum / count : 0;
+
+            // Linear scaling for height
+            const barHeight = (amplitude / 255) * height;
+
             const gradient = this.ctx.createLinearGradient(0, height, 0, height - barHeight);
-            gradient.addColorStop(0, 'rgba(236, 72, 153, 0.8)');
-            gradient.addColorStop(1, 'rgba(99, 102, 241, 0.8)');
+            gradient.addColorStop(0, 'rgba(6, 182, 212, 0.8)'); // Cyan
+            gradient.addColorStop(1, 'rgba(59, 130, 246, 0.8)'); // Blue
             this.ctx.fillStyle = gradient;
-            this.ctx.fillRect(x, height - barHeight, barWidth, barHeight);
-            x += barWidth + 1;
+
+            this.ctx.fillRect(x, height - barHeight, barWidth - 2, barHeight);
+            x += barWidth;
         }
     }
 
