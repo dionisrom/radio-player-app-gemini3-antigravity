@@ -258,6 +258,8 @@ class AudioManager {
             if (this.icecastPlayer) this.icecastPlayer.play();
             this.isPlaying = true;
         }
+        // Update MediaSession playback state
+        this.updatePlaybackState();
     }
 
     setVolume(val) {
@@ -358,6 +360,13 @@ class AudioManager {
             navigator.mediaSession.metadata = null;
             navigator.mediaSession.playbackState = 'none';
             console.log('MediaSession cleared');
+        }
+    }
+
+    updatePlaybackState() {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.playbackState = this.isPlaying ? 'playing' : 'paused';
+            console.log('MediaSession playback state updated:', this.isPlaying ? 'playing' : 'paused');
         }
     }
 }

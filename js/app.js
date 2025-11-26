@@ -480,21 +480,16 @@ class App {
 
         if (this.audio.isPlaying) {
             icon.className = 'fa-solid fa-pause text-base md:text-xl';
-            // Update MediaSession state
-            if ('mediaSession' in navigator && this.currentStation) {
-                navigator.mediaSession.playbackState = 'playing';
-            }
         } else {
             icon.className = 'fa-solid fa-play text-base md:text-xl ml-0.5 md:ml-1';
-            // Update MediaSession state
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.playbackState = 'paused';
-                // Clear metadata if no station is playing
-                if (!this.currentStation) {
-                    this.audio.clearMediaSession();
-                }
+            // Clear metadata if no station is playing
+            if (!this.currentStation) {
+                this.audio.clearMediaSession();
             }
         }
+
+        // Update MediaSession playback state (centralized in audio-manager)
+        this.audio.updatePlaybackState();
     }
 
     toggleTheme() {
