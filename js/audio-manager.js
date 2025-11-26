@@ -12,6 +12,72 @@ class AudioManager {
         this.icecastPlayer = null;
         this.corsEnabled = false;
         this.onMetadata = null;
+
+        // Set up MediaSession handlers once during initialization
+        this.setupMediaSessionHandlers();
+    }
+
+    setupMediaSessionHandlers() {
+        if ('mediaSession' in navigator) {
+            // Set up action handlers for media controls - only once
+            navigator.mediaSession.setActionHandler('play', () => {
+                console.log('MediaSession: Play action');
+                if (!this.isPlaying) {
+                    this.toggle();
+                }
+            });
+
+            navigator.mediaSession.setActionHandler('pause', () => {
+                console.log('MediaSession: Pause action');
+                if (this.isPlaying) {
+                    this.toggle();
+                }
+            });
+
+            navigator.mediaSession.setActionHandler('stop', () => {
+                console.log('MediaSession: Stop action');
+                if (this.isPlaying) {
+                    this.toggle();
+                }
+            });
+
+            // Next/Previous handlers - will be connected to app navigation
+            navigator.mediaSession.setActionHandler('nexttrack', () => {
+                console.log('MediaSession: Next track action');
+                if (window.app && window.app.playNext) {
+                    window.app.playNext();
+                }
+            });
+
+            navigator.mediaSession.setActionHandler('previoustrack', () => {
+                console.log('MediaSession: Previous track action');
+                if (window.app && window.app.playPrevious) {
+                    window.app.playPrevious();
+                }
+            });
+
+            // Seek handlers (optional - some browsers/cars support this)
+            try {
+                navigator.mediaSession.setActionHandler('seekbackward', () => {
+                    console.log('MediaSession: Seek backward (skip to previous)');
+                    if (window.app && window.app.playPrevious) {
+                        window.app.playPrevious();
+                    }
+                });
+
+                navigator.mediaSession.setActionHandler('seekforward', () => {
+                    console.log('MediaSession: Seek forward (skip to next)');
+                    if (window.app && window.app.playNext) {
+                        window.app.playNext();
+                    }
+                });
+            } catch (error) {
+                // Some browsers don't support seek actions
+                console.log('Seek actions not supported:', error.message);
+            }
+
+            console.log('MediaSession action handlers initialized');
+        }
     }
 
     initAudioContext() {
@@ -289,63 +355,6 @@ class AudioManager {
 
             // Update playback state
             navigator.mediaSession.playbackState = this.isPlaying ? 'playing' : 'paused';
-
-            // Set up action handlers for media controls
-            navigator.mediaSession.setActionHandler('play', () => {
-                console.log('MediaSession: Play action');
-                if (!this.isPlaying) {
-                    this.toggle();
-                }
-            });
-
-            navigator.mediaSession.setActionHandler('pause', () => {
-                console.log('MediaSession: Pause action');
-                if (this.isPlaying) {
-                    this.toggle();
-                }
-            });
-
-            navigator.mediaSession.setActionHandler('stop', () => {
-                console.log('MediaSession: Stop action');
-                if (this.isPlaying) {
-                    this.toggle();
-                }
-            });
-
-            // Next/Previous handlers - will be connected to app navigation
-            navigator.mediaSession.setActionHandler('nexttrack', () => {
-                console.log('MediaSession: Next track action');
-                if (window.app && window.app.playNext) {
-                    window.app.playNext();
-                }
-            });
-
-            navigator.mediaSession.setActionHandler('previoustrack', () => {
-                console.log('MediaSession: Previous track action');
-                if (window.app && window.app.playPrevious) {
-                    window.app.playPrevious();
-                }
-            });
-
-            // Seek handlers (optional - some cars support this)
-            try {
-                navigator.mediaSession.setActionHandler('seekbackward', () => {
-                    console.log('MediaSession: Seek backward (skip to previous)');
-                    if (window.app && window.app.playPrevious) {
-                        window.app.playPrevious();
-                    }
-                });
-
-                navigator.mediaSession.setActionHandler('seekforward', () => {
-                    console.log('MediaSession: Seek forward (skip to next)');
-                    if (window.app && window.app.playNext) {
-                        window.app.playNext();
-                    }
-                });
-            } catch (error) {
-                // Some browsers don't support seek actions
-                console.log('Seek actions not supported:', error.message);
-            }
 
             console.log('MediaSession updated:', {
                 title: songTitle || station.name,
