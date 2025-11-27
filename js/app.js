@@ -160,24 +160,17 @@ class App {
         });
 
         this.audio.onMetadata = (meta) => {
-            console.log('App received metadata:', meta);
             if (meta && meta.StreamTitle) {
-                console.log('Updating song info to:', meta.StreamTitle);
-
-                // Clear the no-metadata timeout since we got metadata
                 if (this.metadataTimeout) {
                     clearTimeout(this.metadataTimeout);
                     this.metadataTimeout = null;
                 }
-
                 const songInfo = document.getElementById('player-song-info');
                 songInfo.textContent = meta.StreamTitle;
                 songInfo.classList.remove('animate-pulse');
                 if (this.currentStation) {
                     this.audio.updateMediaSession(this.currentStation, meta.StreamTitle);
                 }
-            } else {
-                console.log('No StreamTitle in metadata');
             }
         };
 
@@ -186,6 +179,11 @@ class App {
 
         // Setup Import/Export functionality
         this.setupImportExport();
+
+        // Listen for playback state changes
+        this.audio.onStateChange = (isPlaying) => {
+            this.updatePlayButton();
+        };
     }
 
     setupImportExport() {
@@ -255,6 +253,7 @@ class App {
     }
 
     async loadStations() {
+
         if (this.isLoading) return;
         this.isLoading = true;
         const loadingEl = document.getElementById('loading-more');
@@ -280,10 +279,8 @@ class App {
     }
 
     async loadFilters() {
-        console.log('Loading filters...');
         this.countries = await this.api.getCountries();
         this.tags = await this.api.getTags();
-        console.log('Filters loaded:', this.countries.length, this.tags.length);
     }
 
     setupFilterDropdowns() {
@@ -446,10 +443,7 @@ class App {
         if (station.codec) parts.push(station.codec);
         techInfo.textContent = parts.join(' • ');
 
-        // Update visualizer mode
-        if (this.visualizer) {
-            this.visualizer.updateMode();
-        }
+
 
         // Update media session immediately on station start
         this.audio.updateMediaSession(station);
@@ -545,13 +539,10 @@ class App {
         const timestamp = new Date().toISOString().split('T')[0];
         link.download = `radio-favorites-${timestamp}.json`;
 
-        // Trigger download
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-
-        console.log(`Exported ${this.favorites.length} favorites`);
     }
 
     importFavorites(event) {
@@ -578,14 +569,10 @@ class App {
                 // Show success message
                 alert(`Successfully imported ${newFavorites.length} new stations!\nTotal favorites: ${this.favorites.length}`);
 
-                // Refresh the list if we're on the favorites tab
                 if (this.currentTab === 'favorites') {
                     this.renderList();
                 }
-
-                console.log(`Imported ${newFavorites.length} new favorites`);
             } catch (error) {
-                console.error('Import error:', error);
                 alert('Error reading file! Please make sure it\'s a valid JSON file.');
             }
         };

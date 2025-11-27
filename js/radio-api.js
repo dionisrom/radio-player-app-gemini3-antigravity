@@ -41,9 +41,7 @@ class RadioApi {
     async sendClick(stationUuid) {
         try {
             await fetch(`${this.baseUrl}/url/${stationUuid}`);
-        } catch (e) { 
-            console.error('Click tracking failed', e); 
-        }
+        } catch (e) { }
     }
 
     async getCountries() {

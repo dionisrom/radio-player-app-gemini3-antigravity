@@ -11,7 +11,9 @@ class AudioManager {
         this.isPlaying = false;
         this.icecastPlayer = null;
         this.corsEnabled = false;
+        this.corsEnabled = false;
         this.onMetadata = null;
+        this.onStateChange = null;
 
         // Set up MediaSession handlers once during initialization
         this.setupMediaSessionHandlers();
@@ -21,62 +23,40 @@ class AudioManager {
         if ('mediaSession' in navigator) {
             // Set up action handlers for media controls - only once
             navigator.mediaSession.setActionHandler('play', () => {
-                console.log('MediaSession: Play action');
-                if (!this.isPlaying) {
-                    this.toggle();
-                }
+                if (!this.isPlaying) this.toggle();
             });
 
             navigator.mediaSession.setActionHandler('pause', () => {
-                console.log('MediaSession: Pause action');
-                if (this.isPlaying) {
-                    this.toggle();
-                }
+                if (this.isPlaying) this.toggle();
             });
 
             navigator.mediaSession.setActionHandler('stop', () => {
-                console.log('MediaSession: Stop action');
-                if (this.isPlaying) {
-                    this.toggle();
-                }
+                if (this.isPlaying) this.toggle();
             });
 
             // Next/Previous handlers - will be connected to app navigation
             navigator.mediaSession.setActionHandler('nexttrack', () => {
-                console.log('MediaSession: Next track action');
-                if (window.app && window.app.playNext) {
-                    window.app.playNext();
-                }
+                if (window.app && window.app.playNext) window.app.playNext();
             });
 
             navigator.mediaSession.setActionHandler('previoustrack', () => {
-                console.log('MediaSession: Previous track action');
-                if (window.app && window.app.playPrevious) {
-                    window.app.playPrevious();
-                }
+                if (window.app && window.app.playPrevious) window.app.playPrevious();
             });
 
             // Seek handlers (optional - some browsers/cars support this)
             try {
                 navigator.mediaSession.setActionHandler('seekbackward', () => {
-                    console.log('MediaSession: Seek backward (skip to previous)');
-                    if (window.app && window.app.playPrevious) {
-                        window.app.playPrevious();
-                    }
+                    if (window.app && window.app.playPrevious) window.app.playPrevious();
                 });
 
                 navigator.mediaSession.setActionHandler('seekforward', () => {
-                    console.log('MediaSession: Seek forward (skip to next)');
-                    if (window.app && window.app.playNext) {
-                        window.app.playNext();
-                    }
+                    if (window.app && window.app.playNext) window.app.playNext();
                 });
             } catch (error) {
                 // Some browsers don't support seek actions
-                console.log('Seek actions not supported:', error.message);
             }
 
-            console.log('MediaSession action handlers initialized');
+
         }
     }
 
@@ -93,17 +73,12 @@ class AudioManager {
 
     connectSource() {
         if (this.source) return;
-        if (!this.corsEnabled) {
-            console.log('Visualizer disabled due to CORS restrictions');
-            return;
-        }
+        if (!this.corsEnabled) return;
         try {
             this.source = this.context.createMediaElementSource(this.audio);
             this.source.connect(this.analyser);
             this.analyser.connect(this.gainNode);
-            // Re-ensure gain is connected to destination
             this.gainNode.connect(this.context.destination);
-            console.log('Audio graph connected: Source -> Analyser -> Gain -> Destination');
         } catch (e) {
             console.warn("CORS restricted audio source - visualizer will not work", e);
             this.corsEnabled = false;
@@ -116,10 +91,7 @@ class AudioManager {
         if (this.source) {
             try {
                 this.source.disconnect();
-                console.log('Audio source disconnected from visualizer');
-            } catch (e) {
-                console.warn('Error disconnecting source:', e);
-            }
+            } catch (e) { }
             this.source = null;
         }
     }
@@ -136,6 +108,7 @@ class AudioManager {
 
         // Set playing state immediately so UI updates correctly
         this.isPlaying = true;
+        if (this.onStateChange) this.onStateChange(this.isPlaying);
 
         // Clear any pending connectSource timeout from previous streams
         if (this.connectTimeout) {
@@ -160,10 +133,7 @@ class AudioManager {
                 this.icecastPlayer = new IcecastMetadataPlayer(url, {
                     audioElement: this.audio,
                     onMetadata: (meta) => {
-                        console.log('Metadata received:', meta);
-                        if (this.onMetadata) {
-                            this.onMetadata(meta);
-                        }
+                        if (this.onMetadata) this.onMetadata(meta);
                     },
                     onError: (message, error) => {
                         console.warn("Icecast Player Error:", message, error);
@@ -184,16 +154,12 @@ class AudioManager {
                             errorStr.includes('NetworkError');
 
                         if (isCORSError) {
-                            console.log('CORS/Network error detected - switching to plain HTML5 audio (no metadata)');
-
                             // Stop and cleanup IcecastMetadataPlayer completely
                             if (this.icecastPlayer) {
                                 try {
                                     this.icecastPlayer.stop();
                                     this.icecastPlayer.detachAudioElement();
-                                } catch (e) {
-                                    console.warn('Error detaching IcecastMetadataPlayer:', e);
-                                }
+                                } catch (e) { }
                                 this.icecastPlayer = null;
                             }
 
@@ -205,7 +171,12 @@ class AudioManager {
                     }
                 });
 
-                this.icecastPlayer.play();
+                this.icecastPlayer.play().catch(e => {
+                    // Ignore AbortError - this happens when switching stations quickly
+                    if (e.name !== 'AbortError') {
+                        console.error('IcecastMetadataPlayer play error:', e);
+                    }
+                });
 
                 // Try to connect for visualizer, but don't fail if CORS blocks it
                 this.connectTimeout = setTimeout(() => {
@@ -215,8 +186,6 @@ class AudioManager {
                 }, 500);
 
             } catch (e) {
-                console.error('IcecastMetadataPlayer failed to initialize:', e);
-                // If initialization fails, use plain HTML5 audio
                 this.playWithoutCORS(url);
             }
         } else {
@@ -229,8 +198,12 @@ class AudioManager {
     }
 
     playWithoutCORS(url) {
-        console.log('Playing with plain HTML5 audio (CORS-free mode)');
         this.corsEnabled = false;
+
+        // Set playing state immediately so UI updates
+        this.isPlaying = true;
+        if (this.onStateChange) this.onStateChange(this.isPlaying);
+        this.updatePlaybackState();
 
         // Clear any pending connectSource timeout
         if (this.connectTimeout) {
@@ -238,9 +211,7 @@ class AudioManager {
             this.connectTimeout = null;
         }
 
-        // Save current volume
         const currentVolume = this.audio.volume || 0.8;
-        console.log('Current volume before CORS-free playback:', currentVolume);
 
         // Stop the old audio element completely
         try {
@@ -252,26 +223,23 @@ class AudioManager {
         // Disconnect old source if it exists
         this.disconnectSource();
 
-        // NUCLEAR OPTION: Create a brand new audio element to ensure no lingering source connections
-        // This fixes the "MediaElementAudioSource outputs zeroes" issue definitively
+        // Create a brand new audio element to ensure no lingering source connections
         this.audio = new Audio();
-
-        // Restore volume to new element
         this.audio.volume = currentVolume;
-        console.log('Created fresh Audio element. Volume set to:', this.audio.volume);
 
         // Play the new element
         this.audio.src = url;
         this.audio.load();
 
         this.audio.play()
-            .then(() => {
-                console.log('Playback started successfully with FRESH audio element');
-                this.isPlaying = true;
-            })
             .catch(e => {
-                console.error("Playback failed with fresh audio element:", e);
+                // Ignore AbortError - this happens when switching stations quickly
+                if (e.name !== 'AbortError') {
+                    console.error("Playback failed with fresh audio element:", e);
+                }
                 this.isPlaying = false;
+                if (this.onStateChange) this.onStateChange(this.isPlaying);
+                this.updatePlaybackState();
             });
     }
 
@@ -289,21 +257,13 @@ class AudioManager {
                         const cue = track.activeCues[0];
                         if (cue.text && cue.text !== lastTitle) {
                             lastTitle = cue.text;
-                            if (this.onMetadata) {
-                                this.onMetadata({ StreamTitle: cue.text });
-                            }
+                            if (this.onMetadata) this.onMetadata({ StreamTitle: cue.text });
                         }
                     }
                 }
 
                 // Try to get from navigator.mediaSession if available
-                if ('mediaSession' in navigator && navigator.mediaSession.metadata) {
-                    const title = navigator.mediaSession.metadata.title;
-                    if (title && title !== lastTitle && title !== 'Select a Station') {
-                        lastTitle = title;
-                        console.log('Metadata from mediaSession:', title);
-                    }
-                }
+
             }
         }, 5000);
     }
@@ -321,10 +281,24 @@ class AudioManager {
             this.audio.pause();
             if (this.icecastPlayer) this.icecastPlayer.stop();
             this.isPlaying = false;
+            if (this.onStateChange) this.onStateChange(this.isPlaying);
         } else {
-            this.audio.play();
-            if (this.icecastPlayer) this.icecastPlayer.play();
+            this.audio.play().catch(e => {
+                // Ignore AbortError - this happens when pausing quickly after play
+                if (e.name !== 'AbortError') {
+                    console.error('Audio play error:', e);
+                }
+            });
+            if (this.icecastPlayer) {
+                this.icecastPlayer.play().catch(e => {
+                    // Ignore AbortError
+                    if (e.name !== 'AbortError') {
+                        console.error('Icecast play error:', e);
+                    }
+                });
+            }
             this.isPlaying = true;
+            if (this.onStateChange) this.onStateChange(this.isPlaying);
         }
         // Update MediaSession playback state
         this.updatePlaybackState();
@@ -357,12 +331,6 @@ class AudioManager {
 
             // Update playback state
             navigator.mediaSession.playbackState = this.isPlaying ? 'playing' : 'paused';
-
-            console.log('MediaSession updated:', {
-                title: songTitle || station.name,
-                artist: songTitle ? station.name : station.tags,
-                state: this.isPlaying ? 'playing' : 'paused'
-            });
         }
     }
 
@@ -370,14 +338,12 @@ class AudioManager {
         if ('mediaSession' in navigator) {
             navigator.mediaSession.metadata = null;
             navigator.mediaSession.playbackState = 'none';
-            console.log('MediaSession cleared');
         }
     }
 
     updatePlaybackState() {
         if ('mediaSession' in navigator) {
             navigator.mediaSession.playbackState = this.isPlaying ? 'playing' : 'paused';
-            console.log('MediaSession playback state updated:', this.isPlaying ? 'playing' : 'paused');
         }
     }
 }
