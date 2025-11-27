@@ -41,8 +41,10 @@ class RadioApi {
     async sendClick(stationUuid) {
         try {
             await fetch(`${this.baseUrl}/url/${stationUuid}`);
-        } catch (e) { 
-            console.error('Click tracking failed', e); 
+        } catch (e) {
+            if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production') {
+                console.error('Click tracking error:', e);
+            }
         }
     }
 
