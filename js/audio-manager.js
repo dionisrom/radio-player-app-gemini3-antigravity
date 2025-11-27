@@ -231,11 +231,16 @@ class AudioManager {
         this.audio.load();
 
         this.audio.play()
+            .then(() => {
+                this.isPlaying = true;
+                if (this.onStateChange) this.onStateChange(this.isPlaying);
+                this.updatePlaybackState();
+            })
             .catch(e => {
                 // Ignore AbortError - this happens when switching stations quickly
-                if (e.name !== 'AbortError') {
-                    console.error("Playback failed with fresh audio element:", e);
-                }
+                if (e.name === 'AbortError') return;
+
+                console.error("Playback failed with fresh audio element:", e);
                 this.isPlaying = false;
                 if (this.onStateChange) this.onStateChange(this.isPlaying);
                 this.updatePlaybackState();
@@ -282,22 +287,30 @@ class AudioManager {
             this.isPlaying = false;
             if (this.onStateChange) this.onStateChange(this.isPlaying);
         } else {
-            this.audio.play().catch(e => {
-                // Ignore AbortError - this happens when pausing quickly after play
-                if (e.name !== 'AbortError') {
-                    console.error('Audio play error:', e);
-                }
-            });
+            this.isPlaying = true;
+            if (this.onStateChange) this.onStateChange(this.isPlaying);
+
             if (this.icecastPlayer) {
                 this.icecastPlayer.play().catch(e => {
                     // Ignore AbortError
                     if (e.name !== 'AbortError') {
                         console.error('Icecast play error:', e);
+                        this.isPlaying = false;
+                        if (this.onStateChange) this.onStateChange(this.isPlaying);
+                        this.updatePlaybackState();
+                    }
+                });
+            } else {
+                this.audio.play().catch(e => {
+                    // Ignore AbortError - this happens when pausing quickly after play
+                    if (e.name !== 'AbortError') {
+                        console.error('Audio play error:', e);
+                        this.isPlaying = false;
+                        if (this.onStateChange) this.onStateChange(this.isPlaying);
+                        this.updatePlaybackState();
                     }
                 });
             }
-            this.isPlaying = true;
-            if (this.onStateChange) this.onStateChange(this.isPlaying);
         }
         // Update MediaSession playback state
         this.updatePlaybackState();

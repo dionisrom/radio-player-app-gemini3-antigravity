@@ -99,8 +99,4 @@ class Visualizer {
     toggleMode() {
         this.mode = this.mode === 'bars' ? 'wave' : 'bars';
     }
-
-    updateMode() {
-        // Placeholder for compatibility
-    }
 }
