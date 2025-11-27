@@ -231,11 +231,6 @@ class AudioManager {
         this.audio.load();
 
         this.audio.play()
-            .then(() => {
-                this.isPlaying = true;
-                if (this.onStateChange) this.onStateChange(this.isPlaying);
-                this.updatePlaybackState();
-            })
             .catch(e => {
                 // Ignore AbortError - this happens when switching stations quickly
                 if (e.name === 'AbortError') return;
