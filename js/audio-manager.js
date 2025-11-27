@@ -11,7 +11,6 @@ class AudioManager {
         this.isPlaying = false;
         this.icecastPlayer = null;
         this.corsEnabled = false;
-        this.corsEnabled = false;
         this.onMetadata = null;
         this.onStateChange = null;
 
