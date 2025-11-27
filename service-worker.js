@@ -3,7 +3,7 @@
  * Provides offline support and faster loading
  */
 
-const CACHE_VERSION = '1.0.0'; // Update this version when assets change
+const CACHE_VERSION = '1.0.1'; // Update this version when assets change
 const CACHE_NAME = `radiowave-v${CACHE_VERSION}`;
 const ASSETS_TO_CACHE = [
     '/',
@@ -76,7 +76,7 @@ self.addEventListener('fetch', (event) => {
     }
 
     event.respondWith(
-        caches.match(event.request)
+        caches.match(event.request, { ignoreSearch: true })
             .then((response) => {
                 if (response) {
                     // Cache hit - return cached response
@@ -107,7 +107,12 @@ self.addEventListener('fetch', (event) => {
                     return response;
                 }).catch((error) => {
                     console.error('[Service Worker] Fetch failed:', error);
-                    // Could return a custom offline page here
+
+                    // Offline fallback for navigation requests
+                    if (event.request.mode === 'navigate') {
+                        return caches.match('/index.html');
+                    }
+
                     throw error;
                 });
             })
