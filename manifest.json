@@ -3,6 +3,8 @@
     "short_name": "RadioWave",
     "description": "A beautiful, feature-rich web radio player with real-time audio visualization and access to over 30,000 stations worldwide.",
     "start_url": "/",
+    "id": "/",
+    "scope": "/",
     "display": "standalone",
     "background_color": "#0f172a",
     "theme_color": "#6366f1",
