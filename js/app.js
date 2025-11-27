@@ -253,7 +253,6 @@ class App {
     }
 
     async loadStations() {
-
         if (this.isLoading) return;
         this.isLoading = true;
         const loadingEl = document.getElementById('loading-more');
